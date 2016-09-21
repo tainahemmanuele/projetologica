@@ -1,7 +1,9 @@
 module imobiliaria
 
-sig Imobiliaria{
-     apartamentos: set Apartamento
+one sig Imobiliaria{
+     apartamentos: set Apartamento,
+     lista: one ListaEspera
+
 }
 
 abstract sig Apartamento{
@@ -17,20 +19,21 @@ sig ApartamentoTresQuartos extends Apartamento{
 	#ApartamentoTresQuartos = 2
 }
 
+one sig Cobertura extends Apartamento{
+}
+
 sig ApartamentoAlugado in Apartamento{
-}
-
-sig Reserva{
-}
-
-sig Aluguel{
 }
 
 sig Pessoa{
 	alugado: one Apartamento
 }
 
-sig Pessoa50anos in Pessoa{
+sig Pessoa50Anos in Pessoa{
+}
+
+one sig ListaEspera {
+ 	pessoas: set Pessoa
 }
 
 fact{
@@ -39,7 +42,10 @@ fact{
 	all p: Pessoa | one p.alugado => p.alugado in ApartamentoAlugado
 }
 
+pred MaiorIgual50[]{
+}
+
 pred show[]{
 }
 
-run show for 5
+run show for 6
