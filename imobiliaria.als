@@ -40,9 +40,19 @@ fact{
 	all a: Apartamento | one a.~apartamentos
 	all a: ApartamentoAlugado | one a.~alugado
 	all p: Pessoa | one p.alugado => p.alugado in ApartamentoAlugado
+	
 }
 
-pred MaiorIgual50[]{
+pred MaiorIgual50[e:ListaEspera]{
+	e.pessoas in Pessoa50Anos
+}
+
+pred ApartamentosEsgotados[i:Imobiliaria]{
+ i.apartamentos in ApartamentoAlugado
+}
+
+pred EntraNaLista[e:ListaEspera]{
+ApartamentosEsgotados[i:Imobiliaria] => e.pessoas 
 }
 
 pred show[]{
