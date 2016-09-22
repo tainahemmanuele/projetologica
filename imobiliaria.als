@@ -48,7 +48,7 @@ pred MaiorIgual50[e:ListaEspera]{
 }
 
 pred ApartamentosEsgotados[i:Imobiliaria]{
- i.apartamentos in ApartamentoAlugado
+ all a:Apartamento | a in  ApartamentoAlugado
 }
 
 pred EntraNaLista[e:ListaEspera]{
