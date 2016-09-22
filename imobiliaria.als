@@ -10,13 +10,9 @@ abstract sig Apartamento{
 }
 
 sig ApartamentoDoisQuartos extends Apartamento{
-}{
-	#ApartamentoDoisQuartos = 3
 }
 
 sig ApartamentoTresQuartos extends Apartamento{
-}{
-	#ApartamentoTresQuartos = 2
 }
 
 one sig Cobertura extends Apartamento{
@@ -37,22 +33,43 @@ one sig ListaEspera {
 }
 
 fact{
+	#ApartamentoDoisQuartos = 3
+	#ApartamentoTresQuartos = 2
 	all a: Apartamento | one a.~apartamentos
 	all a: ApartamentoAlugado | one a.~alugado
-	all p: Pessoa | one p.alugado => p.alugado in ApartamentoAlugado
-	
+	all p: Pessoa | (p !in ListaEspera.pessoas) && (one p.alugado => p.alugado in ApartamentoAlugado)
+	!TodosAlugados => no ListaEspera.pessoas
+	all p: Pessoa | (p.alugado in Cobertura) => (p in Pessoa50Anos)
 }
 
-pred MaiorIgual50[e:ListaEspera]{
-	e.pessoas in Pessoa50Anos
+pred TodosAlugados[]{
+	all a: Apartamento | a in ApartamentoAlugado
 }
 
-pred ApartamentosEsgotados[i:Imobiliaria]{
- all a:Apartamento | a in  ApartamentoAlugado
+pred MaiorIgual50[l: ListaEspera]{
+	l.pessoas in Pessoa50Anos
 }
 
-pred EntraNaLista[e:ListaEspera]{
-ApartamentosEsgotados[i:Imobiliaria] => e.pessoas 
+pred Aluga[p: Pessoa, a: Apartamento]{
+	a !in ApartamentoAlugado
+	p.alugado = a
+	a in ApartamentoAlugado
+}
+
+pred Despeja[p: Pessoa]{
+	p.alugado in ApartamentoAlugado
+	no p.alugado
+	p.alugado !in ApartamentoAlugado
+}
+
+pred AddListaEspera[p: Pessoa, l: ListaEspera] {
+	p !in l.pessoas
+	l.pessoas = l.pessoas + p
+}
+
+pred RemoveListaEspera[p: Pessoa, l: ListaEspera] {
+	p in l.pessoas
+	l.pessoas = l.pessoas - p
 }
 
 pred show[]{
