@@ -56,15 +56,15 @@ fact{
 	all g: Grupo, t: Time | one (g.alugado).t => (g.alugado).t in (Imobiliaria.apartamentosAlugados).t
 	all a: Apartamento, t: Time | (a in (Imobiliaria.apartamentosDisponiveis).t or a in (Imobiliaria.apartamentosAlugados).t) and
 		 (!(a in (Imobiliaria.apartamentosDisponiveis).t and a in (Imobiliaria.apartamentosAlugados).t))
-	--all a: Apartamento | all t: Time | no (a.~alugado).t <=> a in (Imobiliaria.apartamentosDisponiveis).t
-	--all a: Apartamento | all t: Time | one (a.~alugado).t <=> a in (Imobiliaria.apartamentosAlugados).t
+	all a: Apartamento | all t: Time | no a.(~(alugado.t ))<=> a in (Imobiliaria.apartamentosDisponiveis).t
+	all a: Apartamento | all t: Time | one a.(~(alugado.t )) <=> a in (Imobiliaria.apartamentosAlugados).t
 
 	all g: Grupo | all t: Time | (g.alugado).t in Cobertura <=> g.integrantes in Pessoa50Anos
 }
 
 --pred apCheio[a:Apartamento]{
---	a in ApartamentoDoisQuartos => #a.~alugado = 2 and 
---	a in ApartamentoTresQuartos => #a.~alugado = 3
+--a in ApartamentoDoisQuartos => #a.~alugado = 2 and 
+--a in ApartamentoTresQuartos => #a.~alugado = 3
  
 --}
 
