@@ -47,7 +47,7 @@ fact{
 	#Cobertura = 1
 	
 	all g: Grupo | all t: Time | lone (g.alugado).t
-	--all a: Apartamento  | lone (a.~alugado).t
+	all a: Apartamento, t: Time | lone a.(~(alugado.t))
 	all p: Pessoa | #p.~integrantes = 1
 	all g: Grupo | all t: Time | some (g.alugado).t <=> g !in espera[t]
 
