@@ -45,11 +45,16 @@ fact{
 	#ApartamentoDoisQuartos = 3
 	#ApartamentoTresQuartos = 2
 	#Cobertura = 1
+
+
 	
 	all g: Grupo | all t: Time | lone (g.alugado).t
 	all a: Apartamento, t: Time | lone a.(~(alugado.t))
 	all p: Pessoa | #p.~integrantes = 1
 	all g: Grupo | all t: Time | some (g.alugado).t <=> g !in espera[t]
+
+
+
 
 	-- Estes 2 fatos deveriam servir pra contornar os dois comentados abaixo, mas não o fazem, a.~alugado.t não funciona
 	-- pois a relação é ternaria.
@@ -59,14 +64,17 @@ fact{
 	all a: Apartamento | all t: Time | no a.(~(alugado.t ))<=> a in (Imobiliaria.apartamentosDisponiveis).t
 	all a: Apartamento | all t: Time | one a.(~(alugado.t )) <=> a in (Imobiliaria.apartamentosAlugados).t
 
-	all g: Grupo | all t: Time | (g.alugado).t in Cobertura <=> g.integrantes in Pessoa50Anos
+	all g: Grupo | all t: Time | (g.alugado).t in Cobertura and g.integrantes in Pessoa50Anos =>one Cobertura
+   some g: Grupo | all t: Time | (g.alugado).t in Cobertura => g.integrantes in Pessoa50Anos
+	--all a: Apartamento,  g:Grupo, t:Time | (a in Cobertura) and (a in Imobiliaria.apartamentosAlugados.t) => g.integrantes in Pessoa50Anos
+
 }
 
---pred apCheio[a:Apartamento]{
---a in ApartamentoDoisQuartos => #a.~alugado = 2 and 
---a in ApartamentoTresQuartos => #a.~alugado = 3
+pred apCheio[a:Apartamento,t:Time]{
+a in ApartamentoDoisQuartos => #a.(~(alugado.t )) = 2 and 
+a in ApartamentoTresQuartos => #a.(~(alugado.t )) = 3
  
---}
+}
 
 fun espera[t: Time]: set Grupo {
 	((Imobiliaria.lista).grupos).t
@@ -105,7 +113,8 @@ pred desaluga[g: Grupo, a: Apartamento, t,t': Time]{  --verificar o tamanho do g
 }
 
 pred show[]{
-	all g: Grupo | #g.integrantes <= 3
+	  all g: Grupo |#g.integrantes <= 3
+	some Pessoa50Anos
 }
 
 run show for 10 but 20 Pessoa
