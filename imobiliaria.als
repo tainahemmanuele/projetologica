@@ -23,12 +23,10 @@ sig ApartamentoTresQuartos extends Apartamento{
 }
 
 one sig Cobertura{
-	--inquilinos: Grupo -> Time
 	ap: ApartamentoTresQuartos
 }
 
  sig Pessoa{
-	--alugado: lone Apartamento
 }
 
 sig Pessoa50Anos in Pessoa{
@@ -50,29 +48,25 @@ fact{
 	#ApartamentoDoisQuartos = 3
 	#ApartamentoTresQuartos = 3
 	#Cobertura = 1
-	
 
-	--a.(~(alugado.t))
 	all g: Grupo | all t: Time | lone g.(~(inquilinos.t))
-	all a: Apartamento, t: Time | lone a.inquilinos.t
+	all a: Apartamento, t: Time | lone inquilinosAp[a,t]
 	all p: Pessoa | #p.~integrantes = 1
 	all g: Grupo | all t: Time | some g.(~(inquilinos.t)) => g !in espera[t]
 
-
-	all a: Apartamento | all t: Time | no a.inquilinos.t <=> a in (Imobiliaria.apartamentosDisponiveis).t
-	all a: Apartamento | all t: Time | one a.inquilinos.t <=> a in (Imobiliaria.apartamentosAlugados).t
-
-	--all g: Grupo | all t: Time | (g.alugado).t in Cobertura and g.integrantes in Pessoa50Anos => one Cobertura
+	all a: Apartamento | all t: Time | no inquilinosAp[a,t] <=> a in (Imobiliaria.apartamentosDisponiveis).t
+	all a: Apartamento | all t: Time | one inquilinosAp[a,t] <=> a in (Imobiliaria.apartamentosAlugados).t
 	some g: Grupo | all t: Time | apartamentoAlugado[g,t] in Cobertura.ap => apartamentoAlugado[g,t].inquilinos.t.integrantes in Pessoa50Anos
 	all a: Apartamento,  g:Grupo, t:Time | (a in Cobertura.ap) and (a in Imobiliaria.apartamentosAlugados.t) =>  apartamentoAlugado[g,t].inquilinos.t.integrantes in Pessoa50Anos
+}
 
+fun inquilinosAp[a: Apartamento, t: Time]: lone Grupo{
+	a.inquilinos.t
 }
 
 fun apartamentoAlugado[g: Grupo, t:Time]: lone Apartamento{
 	g.(~(inquilinos.t))
-
 }
-
 
 fun espera[t: Time]: set Grupo {
 	((Imobiliaria.lista).grupos).t
@@ -128,7 +122,6 @@ pred desaluga[g: Grupo, a: Apartamento, t,t': Time]{
 pred show[]{
 	all g: Grupo | (#g.integrantes <= 3)
 	#Grupo = 6
-	--no Pessoa50Anos
 	some t:Time | one Cobertura.ap.inquilinos.t 
 }
 
