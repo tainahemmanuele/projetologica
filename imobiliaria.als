@@ -1,6 +1,7 @@
 module imobiliaria
 open util/ordering[Time]
 
+--ASSINATURAS
 one sig Imobiliaria{
 	apartamentosAlugados: Apartamento -> Time,
 	apartamentosDisponiveis: Apartamento -> Time,
@@ -44,6 +45,7 @@ one sig ListaEspera {
 sig Time {
 }
 
+--FATOS
 fact{
 	#ApartamentoDoisQuartos = 3
 	#ApartamentoTresQuartos = 3
@@ -60,6 +62,16 @@ fact{
 	all a: Apartamento,  g:Grupo, t:Time | (a in Cobertura.ap) and (a in Imobiliaria.apartamentosAlugados.t) =>  apartamentoAlugado[g,t].inquilinos.t.integrantes in Pessoa50Anos
 }
 
+fact traces{
+	init[first]
+	all pre: Time - last | let pos = pre.next | 
+		some g: Grupo | some a:Apartamento |
+			alugaEspera[pre, pos] and
+			(aluga[g, a, pre, pos] or
+			desaluga[g, a, pre, pos])
+}
+
+--FUNCOES
 fun inquilinosAp[a: Apartamento, t: Time]: lone Grupo{
 	a.inquilinos.t
 }
@@ -72,6 +84,16 @@ fun espera[t: Time]: set Grupo {
 	((Imobiliaria.lista).grupos).t
 }
 
+
+fun getApAlugado[t: Time]: set Apartamento {
+	(Imobiliaria.apartamentosAlugados).t
+}
+
+fun getApDisponivel[t: Time]: set Apartamento {
+	(Imobiliaria.apartamentosDisponiveis).t
+}
+
+--PREDICADOS
 pred init[t:Time]{
 	no (Apartamento.inquilinos).t and
 	no espera[t] and
@@ -79,14 +101,6 @@ pred init[t:Time]{
 	all a: Apartamento | a !in (Imobiliaria.apartamentosAlugados).t
 }
 
-fact traces{
-	init[first]
-	all pre: Time - last | let pos = pre.next | 
-		some g: Grupo | some a:Apartamento |
-			alugaEspera[pre, pos] and
-			(aluga[g, a, pre, pos] or
-			desaluga[g, a, pre, pos])
-}
 
 pred comunsAlugados[t: Time]{
 	all a: Apartamento - Cobertura.ap | a in (Imobiliaria.apartamentosAlugados).t
@@ -124,5 +138,31 @@ pred show[]{
 	#Grupo = 6
 	some t:Time | one Cobertura.ap.inquilinos.t 
 }
+
+--TESTES
+assert ImobiliariaTemAp{
+	all t:Time | some #( getApAlugado[t] + getApDisponivel[t])
+}
+
+assert GrupoTemMax3{
+	all  g:Grupo |#g.integrantes <= 3
+}
+
+assert GrupoTemMin1{
+	all  g:Grupo |#g.integrantes >= 1
+}
+assert Pessoa50AlugaCobertura{
+	all t:Time,g:Grupo| apartamentoAlugado[g,t] in Cobertura.ap => apartamentoAlugado[g,t].inquilinos.t.integrantes in Pessoa50Anos
+}
+
+assert testaListaEspera{
+	all t:Time, g:Grupo | ! some  g.(~(inquilinos.t)) => g in espera[t]
+}
+
+check ImobiliariaTemAp
+check GrupoTemMax3
+check Pessoa50AlugaCobertura
+check GrupoTemMin1
+check testaListaEspera
 
 run show for 10 but 20 Pessoa
